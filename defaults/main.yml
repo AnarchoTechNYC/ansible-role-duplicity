@@ -1,0 +1,88 @@
+---
+# The default system user that will run backup jobs unless specified
+# in a given job description. A dedicated backup user is often desired
+# in larger deployments, but is not necessary for simpler use cases.
+duplicity_default_backup_user: "{{ ansible_env.SUDO_USER | default(ansible_env.USER, true) | default(ansible_user_id, true) }}"
+
+# List of Duplicity backup jobs for the role to manage.
+duplicity_backup_jobs:
+
+  - name: "Example Job" # Name of the backup job.
+    state: present      # Whether the job should be `present` or `absent`.
+
+    # The user under which to run the backup job. This is also the user
+    # whose crontab file will be edited in the case of a cron job. See
+    # `cron_schedule`, below.
+    user: "{{ duplicity_default_backup_user }}"
+
+    # The directory to make a backup copy of. The specific files that
+    # are backed up will depend on any `--exclude` and `--include`
+    # options specified in the `options` list, see below.
+    source_directory: "{{ '~/' | expanduser }}"
+
+    # The Duplicity backup target. Duplicity expects backup targets to
+    # be listed as a URL. See the URL Format section in `duplicity(1)`
+    # for more information.
+    target_url: "file:///tmp/test-backup-dest"
+
+    # Runtime options to pass to Duplicity.
+    options:
+      # If you are backing up the root directory (`/`), remember to
+      # exclude certain directory trees.
+      - "--exclude /mnt"
+      - "--exclude /proc"
+      - "--exclude /tmp"
+      # Any options recognized by Duplicity can be passed here, too.
+      # For instance, to trigger a full backup if the last full backup
+      # is older than 2 months:
+      - "--full-if-older-than 2M"
+      # Certain Duplicity tasks, such as encrypted backups or backup
+      # targets to rsync servers, can make use of additional options:
+      - '--gpg-options="--cipher-algo=AES256"'
+      - '--rsync-options="--partial --compress"'
+
+    # Dictionary of environment variables to set for this backup job.
+    # The invocation of `duplicity` will run with these environment
+    # variables present.
+    env:
+      # For example, the following will allow rsync-over-Tor.
+      #RSYNC_CONNECT_PROG: "/bin/nc -x 127.0.0.1:9050 %H 873"
+      # Duplicity can read a passphrase for a backup archive
+      # from an environment variable.
+      #PASSPHRASE: "$(/bin/cat ~/.duplicity.secret)"
+
+    # If the backup job connects to an SSH-authenticated backend,
+    # specify the SSH server's host key so it can be validated.
+    # See https://docs.ansible.com/ansible/latest/modules/known_hosts_module.html
+    #ssh_known_host:
+      #name: "example.com.invalid"
+      #key: "{{ lookup('file', 'pubkeys/example.com.invalid') }}"
+
+    # Cron scheduling parameters for the job.
+    cron_schedule:
+      minute: "*"
+      hour: "*"
+      day: "*"
+      month: "*"
+      weekday: "*"
+
+    # Follow-up job specification to remove very old backups.
+    # Each Duplicity job can have a `follow_up` dictionary defined in
+    # which case two backup jobs will be defined. The first is the
+    # main backup job, and the second ("follow up") job is a job that
+    # will clean/rotate/remove very old backups, as defined here.
+    follow_up:
+
+      # The Duplicity action to follow up backup jobs with.
+      # See the "Actions" section in `duplicity(1)` for more info.
+      duplicity_action: "remove-all-but-n-full"
+      duplicity_action_arg: 12
+      # Cron schedule specification for the follow-up job.
+      # The `schedule` key must exist for the follow-up
+      # cron job to be created.
+      schedule:
+        minute: "*"
+        hour: "*"
+        day: "*"
+        month: "*"
+        weekday: "*"

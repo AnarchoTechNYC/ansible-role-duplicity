@@ -1,0 +1,11 @@
+#!/bin/bash -
+#
+# {{ ansible_managed }}
+
+{% if item.env is defined and item.env %}
+{% for var, val in item.env.items() %}
+{{ var }}="{{ val }}" {% endfor %}
+{% endif %}
+duplicity {% if item.options is defined %}
+{{ item.options | join(' ') }}{% endif %}
+ {{ item.source_directory | quote }} "{{ item.target_url }}"

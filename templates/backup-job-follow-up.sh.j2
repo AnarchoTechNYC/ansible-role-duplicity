@@ -1,0 +1,9 @@
+#!/bin/bash -
+#
+# {{ ansible_managed }}
+
+{% if item.env is defined and item.env %}
+{% for var, val in item.env.items() %}
+{{ var }}="{{ val }}" {% endfor %}
+{% endif %}
+duplicity {{ item.follow_up.duplicity_action | quote }} {{ item.follow_up.duplicity_action_arg | quote }} --force "{{ item.target_url }}"

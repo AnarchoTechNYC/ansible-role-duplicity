@@ -1,0 +1,28 @@
+---
+- name: Write SSH known hosts file.
+  vars:
+    home: "~{{ item.user | default(duplicity_default_backup_user) }}"
+  block:
+    - name: Ensure .ssh directory exists.
+      file:
+        path: "{{ home | expanduser }}/.ssh"
+        state: directory
+        owner: "{{ item.user | default(duplicity_default_backup_user) }}"
+        group: "{{ item.user | default(duplicity_default_backup_user) }}"
+        mode: "700"
+
+    - name: Ensure SSH known hosts file exists.
+      file:
+        path: "{{ home | expanduser }}/.ssh/known_hosts"
+        owner: "{{ item.user | default(duplicity_default_backup_user) }}"
+        state: touch
+        modification_time: preserve
+
+    - name: Ensure SSH backup target host is known.
+      when: item.ssh_known_host is defined
+      known_hosts:
+        path: "{{ home | expanduser }}/.ssh/known_hosts"
+        name: "{{ item.ssh_known_host.name }}"
+        key: "{{ item.ssh_known_host.key }}"
+        state: "{{ item.state | default('present') }}"
+        hash_host: true

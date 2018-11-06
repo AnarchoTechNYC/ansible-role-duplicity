@@ -1,0 +1,32 @@
+---
+- name: Ensure correct crontab entries.
+  when: item.cron_schedule is defined
+  vars:
+    home: "~{{ item.user | default(duplicity_default_backup_user) }}/"
+  block:
+    - name: Write backup cron job.
+      cron:
+        name: "{{ item.name | replace(' ', '-') }}"
+        state: "{{ item.state | default('present') }}"
+        user: "{{ item.user | default(duplicity_default_backup_user) }}"
+        minute: "{{ item.cron_schedule.minute | default('*') }}"
+        hour: "{{ item.cron_schedule.hour | default('*') }}"
+        day: "{{ item.cron_schedule.day | default('*') }}"
+        month: "{{ item.cron_schedule.month | default('*') }}"
+        weekday: "{{ item.cron_schedule.weekday | default('*') }}"
+        job: "{{ home | expanduser }}bin/duplicity_jobs/{{ item.name | replace(' ', '-') }}.sh >/dev/null 2>&1"
+
+    - name: Write follow-up cron job.
+      when:
+        - item.follow_up is defined
+        - item.follow_up.schedule is defined
+      cron:
+        name: "{{ item.name | replace(' ', '-') }}-follow-up"
+        state: "{{ item.state | default('present') }}"
+        user: "{{ item.user | default(ansible_env.SUDO_USER) | default(ansible_env.USER, true) | default(ansible_user_id, true) }}"
+        minute: "{{ item.follow_up.schedule.minute | default('*') }}"
+        hour: "{{ item.follow_up.schedule.hour | default('*') }}"
+        day: "{{ item.follow_up.schedule.day | default('*') }}"
+        month: "{{ item.follow_up.schedule.month | default('*') }}"
+        weekday: "{{ item.follow_up.schedule.weekday | default('*') }}"
+        job: "{{ home | expanduser }}bin/duplicity_jobs/{{ item.name | replace(' ', '-') }}-follow-up.sh >/dev/null 2>&1"

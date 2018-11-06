@@ -1,0 +1,30 @@
+---
+- name: Install packages for Duplicity.
+  package:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+      - duplicity
+      - gnupg
+
+- name: Set up SSH for backup jobs.
+  when: item.ssh_known_host is defined
+  include_tasks: "write-known-hosts.yml"
+  loop: "{{ duplicity_backup_jobs }}"
+
+- name: Ensure user Duplicity jobs directory exists.
+  file:
+    path: "{{ '~' + item.user + '/bin/duplicity_jobs' | expanduser }}"
+    state: directory
+    owner: "{{ item.user }}"
+    mode: "700"
+  loop: "{{ duplicity_backup_jobs }}"
+
+- name: Write backup scripts.
+  include_tasks: "write-scripts.yml"
+  loop: "{{ duplicity_backup_jobs }}"
+
+- name: Write cron jobs.
+  include_tasks: "write-crons.yml"
+  loop: "{{ duplicity_backup_jobs }}"

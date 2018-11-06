@@ -1,0 +1,33 @@
+---
+- name: Write scripts.
+  when: item.state | default('present') == "present"
+  vars:
+    home: "~{{ item.user | default(duplicity_default_backup_user) }}/"
+  block:
+    - name: Write backup script.
+      template:
+        src: "backup-job.sh.j2"
+        dest: "{{ home | expanduser }}bin/duplicity_jobs/{{ item.name | replace(' ', '-')}}.sh"
+        owner: "{{ item.user | default(duplicity_default_backup_user) }}"
+        mode: "700"
+
+    - name: Write follow-up job script.
+      template:
+        src: "backup-job-follow-up.sh.j2"
+        dest: "{{ home | expanduser }}bin/duplicity_jobs/{{ item.name | replace(' ', '-')}}-follow-up.sh"
+        owner: "{{ item.user | default(duplicity_default_backup_user) }}"
+        mode: "700"
+
+- name: Remove scripts for absent jobs.
+  when: item.state | default('present') == "absent"
+  block:
+    - name: Remove backup script.
+      file:
+        path: "{{ home | expanduser }}/bin/duplicity_jobs/{{ item.name | replace(' ', '-') }}.sh"
+        state: absent
+
+    - name: Remove follow-up script.
+      when: item.state | default('present') == "absent"
+      file:
+        path: "{{ home | expanduser }}/bin/duplicity_jobs/{{ item.name | replace(' ', '-') }}-follow-up.sh"
+        state: absent
