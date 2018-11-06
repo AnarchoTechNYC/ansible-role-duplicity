@@ -27,11 +27,17 @@ duplicity_backup_jobs:
 
     # Runtime options to pass to Duplicity.
     options:
+      # If you are backing up a home directory (`~/`), remember to
+      # exclude generated/cache files that are probably bloat.
+      - '--exclude "**/.ansible"'
+      - '--exclude "**/.cache"'
+
       # If you are backing up the root directory (`/`), remember to
       # exclude certain directory trees.
-      - "--exclude /mnt"
-      - "--exclude /proc"
-      - "--exclude /tmp"
+      #- "--exclude /mnt"
+      #- "--exclude /proc"
+      #- "--exclude /tmp"
+
       # Any options recognized by Duplicity can be passed here, too.
       # For instance, to trigger a full backup if the last full backup
       # is older than 2 months:

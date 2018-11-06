@@ -1,0 +1,18 @@
+---
+- hosts: localhost
+
+  tasks:
+    - name: Test backup and restore.
+      environment:
+        PASSPHRASE: test
+      block:
+        - name: Trigger backup job.
+          shell: "PASSPHRASE=$PASSPHRASE ~/bin/duplicity_jobs/Example-Job.sh"
+
+        - name: Create restore directory.
+          file:
+            path: "/tmp/restore-test"
+            state: directory
+
+        - name: Verify backup test.
+          shell: "PASSPHRASE=$PASSPHRASE duplicity verify file:///tmp/test-backup-dest /tmp/restore-test"
