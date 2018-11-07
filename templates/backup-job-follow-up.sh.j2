@@ -6,4 +6,5 @@
 {% for var, val in item.env.items() %}
 {{ var }}="{{ val }}" {% endfor %}
 {% endif %}
-duplicity {{ item.follow_up.duplicity_action | quote }} {{ item.follow_up.duplicity_action_arg | quote }} --force "{{ item.target_url }}"
+duplicity {{ item.follow_up.duplicity_action | quote }} {{ item.follow_up.duplicity_action_arg | quote }} --force {% if item.options is defined %}
+{{ item.options | join(' ') }}{% endif %} "{{ item.target_url }}"
