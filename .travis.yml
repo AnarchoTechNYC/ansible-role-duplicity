@@ -40,18 +40,18 @@ script:
   # Check Ansible role/playbook syntax.
   - >
     docker container exec --tty "$(cat ${container_id})" env TERM=xterm
-    ansible-playbook --syntax-check /etc/ansible/roles/ansible-role-duplicity/tests/test.yml
+    ansible-playbook --syntax-check /etc/ansible/roles/ansible-role-duplicity/tests/test.yaml
 
   # Ensure the role/playbook runs without errors or failures.
   - >
     docker exec --tty "$(cat ${container_id})" env TERM=xterm
-    ansible-playbook /etc/ansible/roles/ansible-role-duplicity/tests/test.yml
+    ansible-playbook /etc/ansible/roles/ansible-role-duplicity/tests/test.yaml
 
   # Run the role/playbook again to test idempotence.
   - idempotence=$(mktemp)
   - >
     docker exec "$(cat ${container_id})"
-    ansible-playbook /etc/ansible/roles/ansible-role-duplicity/tests/test.yml
+    ansible-playbook /etc/ansible/roles/ansible-role-duplicity/tests/test.yaml
     | tee -a ${idempotence}
   - >
     tail ${idempotence}
@@ -62,7 +62,7 @@ script:
   # Test restoration of the backup to verify backup success.
   - >
     docker exec --tty "$(cat ${container_id})" env TERM=xterm
-    ansible-playbook --verbose /etc/ansible/roles/ansible-role-duplicity/tests/test-restore.yml
+    ansible-playbook --verbose /etc/ansible/roles/ansible-role-duplicity/tests/test-restore.yaml
 
 after_script:
   - docker container rm -f "$(cat ${container_id})"

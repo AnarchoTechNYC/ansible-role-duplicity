@@ -36,7 +36,7 @@ Each backup job is one or more invocations of `duplicity(1)` with options that c
 Some examples may prove illustrative:
 
 1. Have Alice backup their own home folder once every week to a backup target via rsync over an SSH connection.
-    ```yml
+    ```yaml
     duplicity_backup_jobs:
       - name: "Backup Alice's home folder"
         user: alice
@@ -69,7 +69,7 @@ Some examples may prove illustrative:
 
     For this backup to succeed, you should ensure that the backup archive's symmetric key (password) is stored in the `~/.duplicity.secret` file, or else the cron job will fail as it cannot supply a password with which to encrypt (or decrypt) the Duplicity backup archive. 
 
-See the comments in [`defaults/main.yml`](defaults/main.yml) for additional details.
+See the comments in [`defaults/main.yaml`](defaults/main.yaml) for additional details.
 
 ## Additional role variables
 

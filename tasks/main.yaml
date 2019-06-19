@@ -10,7 +10,7 @@
 
 - name: Set up SSH for backup jobs.
   when: item.ssh_known_host is defined
-  include_tasks: "write-known-hosts.yml"
+  include_tasks: write-known-hosts.yaml
   loop: "{{ duplicity_backup_jobs }}"
 
 - name: Ensure user Duplicity jobs directory exists.
@@ -22,9 +22,9 @@
   loop: "{{ duplicity_backup_jobs }}"
 
 - name: Write backup scripts.
-  include_tasks: "write-scripts.yml"
+  include_tasks: write-scripts.yaml
   loop: "{{ duplicity_backup_jobs }}"
 
 - name: Write cron jobs.
-  include_tasks: "write-crons.yml"
+  include_tasks: write-crons.yaml
   loop: "{{ duplicity_backup_jobs }}"
