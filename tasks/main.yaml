@@ -7,6 +7,7 @@
     packages:
       - duplicity
       - gnupg
+      - netcat # Required for Torified backup destinations.
 
 - name: Set up SSH for backup jobs.
   when: item.ssh_known_host is defined
